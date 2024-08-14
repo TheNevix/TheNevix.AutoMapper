@@ -1,35 +1,42 @@
 ﻿using System.Reflection;
+using TheNevix.AutoMapper.Configurations;
 
 namespace TheNevix.AutoMapper
 {
-    public static class AutoMapper
+    public class AutoMapper
     {
-        public static class Mapper
+        public class Mapper
         {
-            /// <summary>
-            /// Maps properties from a source object of type TSource to a destination object of type TDestination.
-            /// Additional custom mapping logic can be applied after the automatic property mapping.
-            /// </summary>
-            /// <typeparam name="TSource">The type of the source object from which properties are mapped.</typeparam>
-            /// <typeparam name="TDestination">The type of the destination object to which properties are mapped.</typeparam>
-            /// <param name="source">The source object from which property values are read. This object must be of type TSource.</param>
-            /// <param name="customMappingConfig">An optional action to perform custom mapping. 
-            /// This action receives the source and destination objects as parameters, allowing for additional custom mapping logic to be applied after automatic mapping.
-            /// If null, only automatic mapping based on property names and types will be performed.</param>
-            /// <returns>An object of type TDestination with properties mapped from the source object. 
-            /// If customMapping is provided, the returned object will also reflect any modifications made by the custom mapping logic.</returns>
-            public static TDestination Map<TSource, TDestination>(
-                TSource source,
-                Action<TSource, TDestination> customMappingConfig = null) where TDestination : new()
+
+            private readonly AutoMapperConfiguration _configuration;
+
+            public Mapper(AutoMapperConfiguration configuration)
+            {
+                _configuration = configuration;
+            }
+
+            public TDestination Map<TSource, TDestination>(TSource source, string configName = "Default") where TDestination : new()
             {
                 var destination = new TDestination();
-                AutoMapProperties(source, destination); // Your existing auto-mapping logic
+                AutoMapProperties(source, destination);
 
-                // Apply custom mapping if provided
-                customMappingConfig?.Invoke(source, destination);
+                var configs = _configuration.GetMappingConfigs(configName);
+                if (configs != null)
+                {
+                    foreach (var config in configs)
+                    {
+                        // Ensure that the config is for the correct types
+                        if (config.CustomMapping is Action<TSource, TDestination> mappingAction)
+                        {
+                            mappingAction.Invoke(source, destination);
+                            config.UsageCount++;
+                        }
+                    }
+                }
 
                 return destination;
             }
+
 
             private static void AutoMapProperties<TSource, TDestination>(TSource source, TDestination destination)
             {
@@ -43,27 +50,51 @@ namespace TheNevix.AutoMapper
                     var destProp = destProps.FirstOrDefault(p => p.Name == sourceProp.Name && p.CanWrite);
                     if (destProp != null)
                     {
-                        var sourceValue = sourceProp.GetValue(source);
+                        var sourceValue = sourceProp.GetValue(source, null); // This should handle regular properties
+
                         if (sourceValue != null)
                         {
-                            if (sourceProp.PropertyType.IsClass && !sourceProp.PropertyType.Namespace.StartsWith("System"))
+                            if (sourceProp.PropertyType.IsClass && sourceProp.PropertyType != typeof(string))
                             {
-                                // The property is a custom object, so we need to handle it recursively.
-                                object destValue = destProp.GetValue(destination);
-                                if (destValue == null)
+                                if (typeof(System.Collections.IEnumerable).IsAssignableFrom(sourceProp.PropertyType))
                                 {
-                                    // Create a new instance of the property's type if it's null.
-                                    destValue = Activator.CreateInstance(destProp.PropertyType);
-                                    destProp.SetValue(destination, destValue);
+                                    // Handle collections (e.g., List<string>)
+                                    var elementType = sourceProp.PropertyType.GetGenericArguments().FirstOrDefault();
+                                    if (elementType != null)
+                                    {
+                                        var genericListType = typeof(List<>).MakeGenericType(elementType);
+                                        var destList = Activator.CreateInstance(genericListType);
+
+                                        foreach (var item in (System.Collections.IEnumerable)sourceValue)
+                                        {
+                                            ((System.Collections.IList)destList).Add(item);
+                                        }
+
+                                        destProp.SetValue(destination, destList);
+                                    }
                                 }
-                                // Recursively map the properties of the nested objects.
-                                AutoMapProperties(sourceValue, destValue);
+                                else
+                                {
+                                    // Handle nested custom objects recursively
+                                    object destValue = destProp.GetValue(destination);
+                                    if (destValue == null)
+                                    {
+                                        destValue = Activator.CreateInstance(destProp.PropertyType);
+                                        destProp.SetValue(destination, destValue);
+                                    }
+                                    AutoMapProperties(sourceValue, destValue);
+                                }
                             }
                             else
                             {
-                                // The property is not a custom object, so we can directly set its value.
+                                // Handle primitive types and strings
                                 destProp.SetValue(destination, sourceValue);
                             }
+                        }
+                        else
+                        {
+                            // Handle null values
+                            destProp.SetValue(destination, null);
                         }
                     }
                 }
