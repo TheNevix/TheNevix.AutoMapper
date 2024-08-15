@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>TheNevix.AutoMapper</Title>
-    <Version>1.0.0-alpha240815</Version>
+    <Version>1.0.0-beta240815</Version>
     <Authors>TheNevix</Authors>
     <RepositoryUrl>https://github.com/TheNevix/TheNevix.AutoMapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -18,6 +18,8 @@
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<IncludeXmlDocumentation>true</IncludeXmlDocumentation>
+	<PackageReleaseNotes>Beta version 1.0.0 of AutoMapper.
+Added a way to only map certain properties to an existing destination.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
