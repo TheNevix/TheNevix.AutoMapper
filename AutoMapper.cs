@@ -37,6 +37,23 @@ namespace TheNevix.AutoMapper
                 return destination;
             }
 
+            public void MapExistingDestination<TSource, TDestination>(TSource source, TDestination destination, string configName)
+            {
+                var configs = _configuration.GetMappingConfigs(configName);
+                if (configs != null)
+                {
+                    foreach (var config in configs)
+                    {
+                        // Ensure that the config is for the correct types
+                        if (config.CustomMapping is Action<TSource, TDestination> mappingAction)
+                        {
+                            mappingAction.Invoke(source, destination);
+                            config.UsageCount++;
+                        }
+                    }
+                }
+            }
+
 
             private static void AutoMapProperties<TSource, TDestination>(TSource source, TDestination destination)
             {

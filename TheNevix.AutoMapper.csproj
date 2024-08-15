@@ -6,7 +6,29 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>TheNevix.AutoMapper</Title>
-    <Version>1.1.0-alpha240814-4</Version>
+    <Version>1.0.0-alpha240815</Version>
+    <Authors>TheNevix</Authors>
+    <RepositoryUrl>https://github.com/TheNevix/TheNevix.AutoMapper</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>Logo.png</PackageIcon>
+    <Description>A simple AutoMapper for your .NET applications with neat features.</Description>
+    <PackageTags>AutoMapper; TheNevix</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<IncludeXmlDocumentation>true</IncludeXmlDocumentation>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Logo.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
