@@ -13,8 +13,7 @@
 
             _namedMappings[configName].Add(new MappingConfig
             {
-                CustomMapping = customMapping,
-                UsageCount = 0
+                CustomMapping = customMapping
             });
 
             return this;
@@ -33,6 +32,5 @@
     internal class MappingConfig
     {
         public Delegate CustomMapping { get; set; }
-        public int UsageCount { get; set; }
     }
 }
