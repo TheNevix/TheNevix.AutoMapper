@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>TheNevix.AutoMapper</Title>
-    <Version>1.0.0-beta240815</Version>
+    <Version>1.0.0-beta240815-3</Version>
     <Authors>TheNevix</Authors>
     <RepositoryUrl>https://github.com/TheNevix/TheNevix.AutoMapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
