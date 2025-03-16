@@ -114,8 +114,16 @@ namespace TheNevix
                         }
                         else
                         {
-                            // Handle primitive types and strings
-                            destProp.SetValue(destination, sourceValue);
+                            if (destProp.PropertyType != sourceProp.PropertyType)
+                            {
+                                var convertedValue = Convert.ChangeType(sourceValue, destProp.PropertyType);
+                                destProp.SetValue(destination, convertedValue);
+                            }
+                            else
+                            {
+                                // Handle primitive types and strings
+                                destProp.SetValue(destination, sourceValue);
+                            } 
                         }
                     }
                     else
