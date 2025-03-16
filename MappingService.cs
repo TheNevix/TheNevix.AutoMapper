@@ -1,6 +1,4 @@
-﻿using static TheNevix.AutoMapper.AutoMapper;
-
-namespace TheNevix.AutoMapper
+﻿namespace TheNevix.AutoMapper
 {
     public class MappingService : IMappingService
     {
