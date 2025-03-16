@@ -81,6 +81,15 @@ namespace TheNevix
 
                     if (sourceValue != null)
                     {
+                        Type destType = destProp.PropertyType;
+
+                        // **Handle Nullable<T> types correctly**
+                        bool isNullable = Nullable.GetUnderlyingType(destType) != null;
+                        if (isNullable)
+                        {
+                            destType = Nullable.GetUnderlyingType(destType); // Extract underlying type (e.g., int from int?)
+                        }
+
                         if (sourceProp.PropertyType.IsClass && sourceProp.PropertyType != typeof(string))
                         {
                             if (typeof(System.Collections.IEnumerable).IsAssignableFrom(sourceProp.PropertyType))
@@ -102,7 +111,7 @@ namespace TheNevix
                             }
                             else
                             {
-                                // Handle nested custom objects recursively
+                                // **Handle nested objects recursively**
                                 object destValue = destProp.GetValue(destination);
                                 if (destValue == null)
                                 {
@@ -114,22 +123,26 @@ namespace TheNevix
                         }
                         else
                         {
-                            if (destProp.PropertyType != sourceProp.PropertyType)
+                            try
                             {
-                                var convertedValue = Convert.ChangeType(sourceValue, destProp.PropertyType);
+                                object convertedValue = (destType == sourceProp.PropertyType)
+                                    ? sourceValue
+                                    : Convert.ChangeType(sourceValue, destType);
+
                                 destProp.SetValue(destination, convertedValue);
                             }
-                            else
+                            catch (Exception)
                             {
-                                // Handle primitive types and strings
-                                destProp.SetValue(destination, sourceValue);
-                            } 
+                                // Ignore conversion errors to prevent runtime crashes
+                            }
                         }
                     }
                     else
                     {
-                        // Handle null values
-                        destProp.SetValue(destination, null);
+                        if (Nullable.GetUnderlyingType(destProp.PropertyType) != null || !destProp.PropertyType.IsValueType)
+                        {
+                            destProp.SetValue(destination, null);
+                        }
                     }
                 }
             }
