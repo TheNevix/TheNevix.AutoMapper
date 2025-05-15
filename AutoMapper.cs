@@ -1,4 +1,8 @@
-﻿using TheNevix.AutoMapper.Configurations;
+﻿using System.Collections;
+using System.Collections.Concurrent;
+using System.Linq.Expressions;
+using System.Reflection;
+using TheNevix.AutoMapper.Configurations;
 
 namespace TheNevix
 {
@@ -21,8 +25,8 @@ namespace TheNevix
         /// <returns>The destination object of type <typeparamref name="TDestination"/>.</returns>
         public TDestination Map<TSource, TDestination>(TSource source, string configName = "Default") where TDestination : new()
         {
-            var destination = new TDestination();
-            AutoMapProperties(source, destination);
+            var destination = AutoMapProperties<TSource, TDestination>(source);
+
 
             var configs = _configuration.GetMappingConfigs(configName);
             if (configs != null)
@@ -146,6 +150,52 @@ namespace TheNevix
                     }
                 }
             }
+        }
+
+        private static readonly ConcurrentDictionary<(Type Source, Type Dest), Delegate> _mapCache = new();
+
+        public static TDestination AutoMapProperties<TSource, TDestination>(TSource source)
+            where TDestination : new()
+        {
+            if (source == null) return default;
+
+            var key = (typeof(TSource), typeof(TDestination));
+            if (!_mapCache.TryGetValue(key, out var cachedDelegate))
+            {
+                cachedDelegate = BuildMapFunc<TSource, TDestination>();
+                _mapCache[key] = cachedDelegate;
+            }
+
+            var mapFunc = (Func<TSource, TDestination>)cachedDelegate;
+            return mapFunc(source);
+        }
+
+        private static Func<TSource, TDestination> BuildMapFunc<TSource, TDestination>()
+            where TDestination : new()
+        {
+            var sourceType = typeof(TSource);
+            var destType = typeof(TDestination);
+
+            var sourceParam = Expression.Parameter(sourceType, "src");
+            var bindings = new List<MemberBinding>();
+
+            foreach (var destProp in destType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (!destProp.CanWrite) continue;
+
+                var sourceProp = sourceType.GetProperty(destProp.Name, BindingFlags.Public | BindingFlags.Instance);
+                if (sourceProp == null || !sourceProp.CanRead) continue;
+
+                if (!destProp.PropertyType.IsAssignableFrom(sourceProp.PropertyType)) continue;
+
+                var sourceValue = Expression.Property(sourceParam, sourceProp);
+                var binding = Expression.Bind(destProp, sourceValue);
+                bindings.Add(binding);
+            }
+
+            var body = Expression.MemberInit(Expression.New(destType), bindings);
+            var lambda = Expression.Lambda<Func<TSource, TDestination>>(body, sourceParam);
+            return lambda.Compile();
         }
     }
 }
