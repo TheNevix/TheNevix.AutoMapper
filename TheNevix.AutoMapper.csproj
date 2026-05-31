@@ -1,17 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	 <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+	 <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
 	 <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>TheNevix.AutoMapper</Title>
-    <Version>1.0.0-beta250515</Version>
+    <Version>1.0.0-beta260531</Version>
     <Authors>TheNevix</Authors>
     <RepositoryUrl>https://github.com/TheNevix/TheNevix.AutoMapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageIcon>Logo.png</PackageIcon>
     <Description>A simple AutoMapper for your .NET applications with neat features.</Description>
     <PackageTags>AutoMapper; TheNevix</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -19,15 +18,12 @@
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<IncludeXmlDocumentation>true</IncludeXmlDocumentation>
 	<PackageReleaseNotes>Beta version 1.0.0 of AutoMapper.
-Added a way to only map certain properties to an existing destination.</PackageReleaseNotes>
+Added a way to only map certain properties to an existing destination.
+Added support for .NET 9 and .NET 10. Dropped EOL targets net6.0 and net7.0.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Logo.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)README.md">
+<None Include="$(MSBuildThisFileDirectory)README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

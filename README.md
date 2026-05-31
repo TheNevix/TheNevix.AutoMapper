@@ -4,6 +4,12 @@
 
 A simple AutoMapper for your .NET applications with neat features.
 
+## Supported Frameworks
+
+- .NET 8
+- .NET 9
+- .NET 10
+
 ## Features
 
 - Quickly map two objects with no configuration
